@@ -12,6 +12,18 @@ const app = express();
 
 
 // Middleware
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'https://mern-app-frontend-orcin.vercel.app',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors()); // enable pre-flight across-the-board
+
+/*
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',  // ✅ Vite dev server
@@ -32,6 +44,7 @@ app.use(cors({
   },
   credentials: true
 }));
+*/
 
 // Body parser for JSON data
 app.use(express.json()); 
@@ -52,6 +65,16 @@ app.use("/api/auth", authRoutes); // Example auth routes
 app.get('/', (req, res) => {
   res.send('MERN Backend is Live! API is running...');
 });
+
+app.use((req, res, next) => {
+  console.log("Request Origin:", req.headers.origin);
+  next();
+});
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).json({ message: err.message });
+});
+
 
 
 const PORT = process.env.PORT || 5000;
