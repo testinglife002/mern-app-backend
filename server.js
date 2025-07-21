@@ -1,26 +1,60 @@
+require('dotenv').config(); // Load environment variables first
 const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const cors = require("cors");
+const cors = require('cors');
+const connectDB = require('./config/db');
+const authRoutes = require("./routes/authRoutes"); // Example route
+// const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 
-const authRoutes = require("./routes/authRoutes");
+connectDB(); // Connect to MongoDB
 
-dotenv.config();
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
-app.use(express.json());
+
+// Middleware
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',  // ✅ Vite dev server
+  'https://mern-app-frontend-orcin.vercel.app',
+  'https://968ccaaff526.ngrok-free.app',
+  'https://48e41932009d.ngrok-free.app',
+];
+
+// Enable CORS
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman) or allowed origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// Body parser for JSON data
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cookieParser());
 
-
+/*
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
+*/
 
+// Routes
+app.use("/api/auth", authRoutes); // Example auth routes
 
-app.use("/api/auth", authRoutes);
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+// Basic route for testing
+app.get('/', (req, res) => {
+  res.send('MERN Backend is Live! API is running...');
 });
+
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
