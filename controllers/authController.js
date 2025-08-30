@@ -78,3 +78,15 @@ export const logout = (req, res) => {
   res.clearCookie("token").json({ message: "Logged out" });
 };
 
+exports.getLoggedInUser = async (req, res) => {
+  try {
+    // const user = await User.findById(req.user.id).select('-password');
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    res.json({ user: req.user });
+  } catch (err) {
+    console.error('Error fetching logged-in user:', err.message);
+    res.status(500).send('Server Error');
+  }
+};
